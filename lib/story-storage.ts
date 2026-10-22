@@ -6,6 +6,7 @@ export type StoryUiPrefs = {
   hideAvatar?: boolean;
   hideTimestamp?: boolean;
   theme?: string;
+  streamOutput?: boolean;
 };
 
 export type StorySession = {
