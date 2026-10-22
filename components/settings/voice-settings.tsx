@@ -703,6 +703,20 @@ export function VoiceSettings() {
                                                         placeholder={config.provider === "FishAudio" ? "https://api.fish.audio/v1" : "https://api.openai.com/v1"}
                                                     />
                                                 </div>
+                                                {config.provider === "FishAudio" && (
+                                                    <div className="flex flex-col gap-1">
+                                                        <label className="menu-desc ml-1">Latency 级别（可选）</label>
+                                                        <select
+                                                            value={config.model || ""}
+                                                            onChange={(e) => updateConfig(config.id, { model: e.target.value })}
+                                                            className="ui-select"
+                                                        >
+                                                            <option value="">默认 (由服务端决定)</option>
+                                                            <option value="normal">normal</option>
+                                                            <option value="balanced">balanced</option>
+                                                        </select>
+                                                    </div>
+                                                )}
                                                 {config.provider === "OpenAI" && (
                                                     <>
                                                         <div className="flex flex-col gap-1">

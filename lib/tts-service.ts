@@ -155,18 +155,25 @@ async function synthesizeFishAudio(text: string, config: VoiceApiConfig): Promis
     if (!config.apiKey) throw new Error("Fish Audio API Key 未配置");
 
     const baseUrl = config.baseUrl || "https://api.fish.audio/v1";
+    const bodyPayload: Record<string, any> = {
+        text,
+        reference_id: config.defaultVoice || undefined,
+        format: "mp3",
+        mp3_bitrate: 128,
+    };
+    
+    // 如果用户在模型输入框里填了 latency 级别（如 normal, balanced）
+    if (config.model) {
+        bodyPayload.latency = config.model;
+    }
+
     const response = await fetchWithTimeout(`${baseUrl.replace(/\/$/, "")}/tts`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${config.apiKey}`,
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            text,
-            reference_id: config.defaultVoice || undefined,
-            format: "mp3",
-            mp3_bitrate: 128,
-        }),
+        body: JSON.stringify(bodyPayload),
     });
 
     if (!response.ok) {
