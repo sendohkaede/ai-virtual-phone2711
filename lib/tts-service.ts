@@ -149,36 +149,26 @@ async function synthesizeMinimax(text: string, config: VoiceApiConfig, emotion?:
     throw new Error(data.base_resp?.status_msg || "Minimax 未返回音频数据");
 }
 
-// ── Fish Audio TTS ────────────────────────────────────
+// ── Fish Audio TTS (走服务端代理解决 CORS) ─────────────
 
 async function synthesizeFishAudio(text: string, config: VoiceApiConfig): Promise<Blob | null> {
     if (!config.apiKey) throw new Error("Fish Audio API Key 未配置");
 
-    const baseUrl = config.baseUrl || "https://api.fish.audio/v1";
-    const bodyPayload: Record<string, any> = {
-        text,
-        reference_id: config.defaultVoice || undefined,
-        format: "mp3",
-        mp3_bitrate: 128,
-    };
-    
-    // 如果用户在模型输入框里填了 latency 级别（如 normal, balanced）
-    if (config.model) {
-        bodyPayload.latency = config.model;
-    }
-
-    const response = await fetchWithTimeout(`${baseUrl.replace(/\/$/, "")}/tts`, {
+    const response = await fetchWithTimeout(`/api/voice/fish-tts`, {
         method: "POST",
-        headers: {
-            Authorization: `Bearer ${config.apiKey}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bodyPayload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            apiKey: config.apiKey,
+            baseUrl: config.baseUrl,
+            text,
+            reference_id: config.defaultVoice,
+            latency: config.model || undefined,
+        }),
     });
 
     if (!response.ok) {
-        const errText = await response.text().catch(() => "");
-        throw new Error(`Fish Audio 请求失败 (${response.status}): ${errText}`);
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Fish Audio 请求失败 (${response.status})`);
     }
 
     const blob = await response.blob();
