@@ -162,7 +162,7 @@ async function synthesizeFishAudio(text: string, config: VoiceApiConfig): Promis
             baseUrl: config.baseUrl,
             text,
             reference_id: config.defaultVoice,
-            latency: config.model || undefined,
+            model: "s2.1-pro-free",
         }),
     });
 
