@@ -10,7 +10,7 @@ import { ConfirmDialog } from "@/components/ui/modal";
 import { Toggle, Input } from "@/components/ui/form";
 import { Alert } from "@/components/ui/feedback";
 
-const SUPPORTED_VOICE_PROVIDERS = new Set(["Minimax", "OpenAI", "FishAudio"]);
+const SUPPORTED_VOICE_PROVIDERS = new Set(["Minimax", "OpenAI"]);
 const MINIMAX_BASE_URL_OPTIONS = [
     { id: "cn", label: "国内版", baseUrl: "https://api.minimaxi.com/v1" },
     { id: "global", label: "海外版", baseUrl: "https://api.minimax.io/v1" },
@@ -30,7 +30,6 @@ const VOICE_PROVIDER_OPTIONS = [
     { value: "OpenAI", label: "OpenAI TTS" },
     { value: "MinimaxCN", label: "Minimax 语音国内版" },
     { value: "MinimaxGlobal", label: "Minimax 语音海外版" },
-    { value: "FishAudio", label: "Fish Audio" },
 ];
 
 const DEFAULT_VOICE_CONFIGS: VoiceApiConfig[] = [
@@ -183,9 +182,7 @@ function uniqueOptions(options: VoiceOption[]): VoiceOption[] {
 }
 
 function defaultVoiceOptions(provider: string): VoiceOption[] {
-    if (provider === "OpenAI") return DEFAULT_OPENAI_VOICES;
-    if (provider === "FishAudio") return []; // FishAudio 通常使用 Reference ID 直接调用
-    return DEFAULT_MINIMAX_VOICES;
+    return provider === "OpenAI" ? DEFAULT_OPENAI_VOICES : DEFAULT_MINIMAX_VOICES;
 }
 
 function voiceOptionsForConfig(config: VoiceApiConfig, fetchedVoices: Record<string, VoiceOption[]>): VoiceOption[] {
@@ -225,7 +222,6 @@ function makeCloneVoiceId(config: VoiceApiConfig): string {
 
 function providerSelectValue(config: VoiceApiConfig): string {
     if (config.provider === "OpenAI") return "OpenAI";
-    if (config.provider === "FishAudio") return "FishAudio";
     return config.baseUrl === GLOBAL_MINIMAX_BASE_URL ? "MinimaxGlobal" : "MinimaxCN";
 }
 
@@ -317,17 +313,6 @@ export function VoiceSettings() {
             });
             setManualModelIds(prev => ({ ...prev, [id]: true }));
             setManualVoiceIds(prev => ({ ...prev, [id]: false }));
-            return;
-        }
-        if (providerOption === "FishAudio") {
-            updateConfig(id, {
-                provider: "FishAudio",
-                baseUrl: "https://api.fish.audio/v1",
-                model: "", // FishAudio TTS API 默认不需要传 model
-                defaultVoice: "", // 需填入 Reference ID
-            });
-            setManualModelIds(prev => ({ ...prev, [id]: true }));
-            setManualVoiceIds(prev => ({ ...prev, [id]: true }));
             return;
         }
         const wasMinimax = current?.provider === "Minimax";
@@ -692,7 +677,7 @@ export function VoiceSettings() {
                                                 placeholder="输入密钥..."
                                             />
                                         </div>
-                                        {(config.provider === "OpenAI" || config.provider === "FishAudio") && (
+                                        {config.provider === "OpenAI" && (
                                             <>
                                                 <div className="flex flex-col gap-1">
                                                     <label className="menu-desc ml-1">接口地址 (Base URL)</label>
@@ -700,13 +685,11 @@ export function VoiceSettings() {
                                                         type="text"
                                                         value={config.baseUrl || ""}
                                                         onChange={(e) => updateConfig(config.id, { baseUrl: e.target.value })}
-                                                        placeholder={config.provider === "FishAudio" ? "https://api.fish.audio/v1" : "https://api.openai.com/v1"}
+                                                        placeholder="https://api.openai.com/v1"
                                                     />
                                                 </div>
-                                                {config.provider === "OpenAI" && (
-                                                    <>
-                                                        <div className="flex flex-col gap-1">
-                                                            <label className="menu-desc ml-1">语音模型 (TTS Model)</label>
+                                                <div className="flex flex-col gap-1">
+                                                    <label className="menu-desc ml-1">语音模型 (TTS Model)</label>
                                                             {manualModelIds[config.id] ? (
                                                                 <div className="flex gap-2">
                                                                     <Input
@@ -754,8 +737,6 @@ export function VoiceSettings() {
                                                             />
                                                             <span className="menu-desc ml-1">通话「按住说话」用它把录音转成文字（非 iOS 设备生效），走同一个接口地址与密钥</span>
                                                         </div>
-                                                    </>
-                                                )}
                                             </>
                                         )}
 
@@ -870,7 +851,7 @@ export function VoiceSettings() {
                                                                 type="text"
                                                                 value={config.defaultVoice}
                                                                 onChange={(e) => updateConfig(config.id, { defaultVoice: e.target.value })}
-                                                                placeholder={config.provider === "OpenAI" ? "alloy" : config.provider === "FishAudio" ? "填入 Reference ID" : "male-qn-qingse 或克隆 Voice ID"}
+                                                                placeholder={config.provider === "OpenAI" ? "alloy" : "male-qn-qingse 或克隆 Voice ID"}
                                                                 className="flex-1"
                                                             />
                                                             <button
