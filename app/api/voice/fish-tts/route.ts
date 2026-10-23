@@ -30,7 +30,6 @@ export async function POST(req: NextRequest) {
     text,
     format: "mp3",
     mp3_bitrate: 128,
-    model: "s2.1-pro-free",
 };
 if (referenceId) payload.reference_id = referenceId;
 
@@ -41,6 +40,7 @@ if (referenceId) payload.reference_id = referenceId;
                 headers: {
                     Authorization: `Bearer ${apiKey}`,
                     "Content-Type": "application/json",
+                    "model": "s2.1-pro-free",
                 },
                 body: JSON.stringify(payload),
             });
