@@ -154,7 +154,7 @@ async function synthesizeMinimax(text: string, config: VoiceApiConfig, emotion?:
 async function synthesizeFishAudio(text: string, config: VoiceApiConfig): Promise<Blob | null> {
     if (!config.apiKey) throw new Error("Fish Audio API Key 未配置");
 
-    const response = await fetchWithTimeout(`/api/voice/fish-tts`, {
+        const response = await fetchWithTimeout(`/api/voice/fish-tts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
