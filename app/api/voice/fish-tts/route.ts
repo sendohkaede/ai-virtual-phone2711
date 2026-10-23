@@ -26,13 +26,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "待合成文本为空" }, { status: 400 });
         }
 
-        const payload: Record<string, unknown> = {
-            text,
-            format: "mp3",
-            mp3_bitrate: 128,
-        };
-        if (referenceId) payload.reference_id = referenceId;
-        if (latency) payload.latency = latency;
+    const payload: Record<string, unknown> = {
+    text,
+    format: "mp3",
+    mp3_bitrate: 128,
+    model: "s2.1-pro-free",
+};
+if (referenceId) payload.reference_id = referenceId;
 
         let upstream: Response;
         try {
